@@ -18,6 +18,7 @@ import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/filedata/filedata_service.dart";
 import "package:photos/services/filedata/model/file_data.dart";
+import "package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_recognition_service.dart";
 import "package:photos/services/machine_learning/ml_exceptions.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
@@ -432,6 +433,15 @@ Future<MLResult> analyzeImageStatic(Map args) async {
             })
           : Future.value(null),
     ]);
+
+    final yoloInferenceAvg = yoloInferenceTimesMs.isNotEmpty
+          ? yoloInferenceTimesMs.reduce((a, b) => a + b) /
+              yoloInferenceTimesMs.length
+          : 0;
+      _logger.info("Inference times of yolo all-inc: $yoloInferenceTimesMs");
+      _logger.info(
+        "Average inference time of yolo all-inc: $yoloInferenceAvg based on ${yoloInferenceTimesMs.length} images",
+      );
 
     if (pipelines[0] != null) result.faces = pipelines[0] as List<FaceResult>;
     if (pipelines[1] != null) result.clip = pipelines[1] as ClipResult;

@@ -10,11 +10,14 @@ import "package:photos/models/ml/face/dimension.dart";
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
 import "package:photos/services/machine_learning/ml_model.dart";
 
+final List<int> yoloInferenceTimesMs = [];
+
 class YOLOFaceInterpreterRunException implements Exception {}
 
 /// This class is responsible for running the face detection model (YOLOv5Face) on ONNX runtime, and can be accessed through the singleton instance [FaceDetectionService.instance].
 class FaceDetectionService extends MlModel {
-  static const kRemoteBucketModelPath = "yolov5s_face_opset18_rgba_opt_nosplits.onnx";
+  static const kRemoteBucketModelPath =
+      "yolov5s_face_opset18_rgba_opt_nosplits.onnx";
   static const _modelName = "YOLOv5Face";
 
   @override
@@ -71,6 +74,8 @@ class FaceDetectionService extends MlModel {
         ); // [detections, 16]
       }
       final inferenceTime = DateTime.now();
+      final inferenceMs = inferenceTime.difference(startTime).inMilliseconds;
+      yoloInferenceTimesMs.add(inferenceMs);
       _logger.info(
         'Face detection is finished, in ${inferenceTime.difference(startTime).inMilliseconds} ms',
       );
