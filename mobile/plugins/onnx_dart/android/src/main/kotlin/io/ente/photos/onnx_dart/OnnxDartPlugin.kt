@@ -199,10 +199,15 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
           }
         }
 
+        var buffer: ByteBuffer = ByteBuffer.allocate(0)
+        if (inputUint8DataArray != null) {
+          buffer = ByteBuffer.wrap(inputUint8DataArray)
+        }
+//        val buffer = ByteBuffer.wrap(inputUint8DataArray)
         val inputTensor = when {
           inputDataFloat != null -> OnnxTensor.createTensor(env, FloatBuffer.wrap(inputDataFloat), inputTensorShape)
           inputDataInt != null -> OnnxTensor.createTensor(env, IntBuffer.wrap(inputDataInt), inputTensorShape)
-          inputUint8DataArray != null -> OnnxTensor.createTensor(env, ByteBuffer.wrap(inputUint8DataArray), inputTensorShape, OnnxJavaType.UINT8)
+          inputUint8DataArray != null -> OnnxTensor.createTensor(env, buffer, inputTensorShape, OnnxJavaType.UINT8)
           else -> throw IllegalArgumentException("No input data provided")
         }
         val inputs = mutableMapOf<String, OnnxTensor>()
@@ -219,6 +224,7 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
         }
         outputs.close()
         inputTensor.close()
+        buffer.clear()
       } catch (e: OrtException) {
         withContext(Dispatchers.Main) {
           result.error("PREDICTION_ERROR", "Error during prediction: ${e.message} ${e.stackTraceToString()}", null)
